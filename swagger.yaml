@@ -1,0 +1,135 @@
+openapi: 3.0.0
+info:
+  title: NeuroLov API
+  version: 1.0.0
+  description: API for the NeuroLov Telegram micro-application
+
+servers:
+  - url: http://localhost:3000/api
+    description: Local development server
+
+paths:
+  /users:
+    post:
+      summary: Create a new user
+      tags:
+        - Users
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserInput'
+      responses:
+        '201':
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Bad request
+
+  /game/tap:
+    post:
+      summary: Process a tap action
+      tags:
+        - Game
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                isOverclocked:
+                  type: boolean
+      responses:
+        '200':
+          description: Tap processed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TapResult'
+        '401':
+          description: Unauthorized
+
+  /leaderboard:
+    get:
+      summary: Get the leaderboard
+      tags:
+        - Leaderboard
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Leaderboard retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LeaderboardEntry'
+        '401':
+          description: Unauthorized
+
+components:
+  schemas:
+    UserInput:
+      type: object
+      required:
+        - telegramId
+        - username
+      properties:
+        telegramId:
+          type: string
+        username:
+          type: string
+
+    User:
+      type: object
+      properties:
+        _id:
+          type: string
+        telegramId:
+          type: string
+        username:
+          type: string
+        xp:
+          type: number
+        compute:
+          type: number
+        gpuLevel:
+          type: number
+
+    TapResult:
+      type: object
+      properties:
+        compute:
+          type: number
+        xp:
+          type: number
+        gpuLevel:
+          type: number
+
+    LeaderboardEntry:
+      type: object
+      properties:
+        rank:
+          type: number
+        username:
+          type: string
+        xp:
+          type: number
+        compute:
+          type: number
+        gpuLevel:
+          type: number
+
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
